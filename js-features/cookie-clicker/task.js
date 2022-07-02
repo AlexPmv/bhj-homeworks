@@ -8,10 +8,6 @@ let countdownDate = 0;
 cookie.onclick = () => {
     clickerCounter.textContent++;
     clickSpeed.textContent = (countdownDate === 0) ? '1' : (1000 / (Date.now() - countdownDate)).toFixed(2);
-    if (+clickerCounter.textContent % 2 !== 0) {
-        cookie.width = 250;
-    } else {
-        cookie.width = 200;
-    };
+    +clickerCounter.textContent % 2 !== 0 ? cookie.width = 250 : cookie.width = 200;
     countdownDate = Date.now();
 };
