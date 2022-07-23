@@ -2,6 +2,14 @@ const products = document.querySelector('.products');
 const cart = document.querySelector('.cart');
 const cartBox = document.querySelector('.cart__products');
 
+class cartObject {
+    constructor (productId, imgSrc, quantityValue) {
+        this.productId = productId;
+        this.imgSrc = imgSrc;
+        this.quantityValue = quantityValue;
+    };
+};
+
 products.addEventListener('click', (evt) => {
     const target = evt.target;
 
@@ -44,27 +52,27 @@ function quantityControlCalc(target) {
 function addToCart(target) {
     const currentProduct = target.closest('.product');
     const currentProductId = currentProduct.dataset.id;
+    const imgSrc = currentProduct.querySelector('img').src;
+    const quantityValue = currentProduct.querySelector('.product__quantity-value').innerText;
 
     if (!checkCartforProduct(currentProductId)) {
-        const productToCart = 
+        cartBox.innerHTML +=
         ` <div class="cart__product" data-id="${currentProductId}">
-            <img class="cart__product-image" src="${currentProduct.querySelector('img').src}">
-            <div class="cart__product-count">${currentProduct.querySelector('.product__quantity-value').innerText}</div>
+            <img class="cart__product-image" src="${imgSrc}">
+            <div class="cart__product-count">${quantityValue}</div>
             <a class="cart__product-remove" href="#0">&times;</a>
         </div>`;
 
-        cartBox.innerHTML += productToCart;
-        localStorage[`id_${currentProductId}`] = productToCart;
-    } else {
+        localStorage[`id_${currentProductId}`] = JSON.stringify(new cartObject(currentProductId, imgSrc, quantityValue));
 
+    } else {
         const tempElement = document.createElement('div');
-        tempElement.innerHTML = localStorage[`id_${currentProductId}`];
+        tempElement.innerHTML = parseFromStorage(`id_${currentProductId}`);
 
         const currentProductCount = +tempElement.querySelector('.cart__product-count').textContent + 
         +currentProduct.querySelector('.product__quantity-value').textContent;
         
-        tempElement.querySelector('.cart__product-count').textContent = currentProductCount;
-        localStorage[`id_${currentProductId}`] = tempElement.innerHTML;
+        localStorage[`id_${currentProductId}`] = JSON.stringify(new cartObject(currentProductId, tempElement.querySelector('.cart__product-image').src, currentProductCount));
 
         Array.from(cartBox.querySelectorAll('.cart__product')).find((productInCard) => 
         productInCard.dataset.id === currentProductId).querySelector('.cart__product-count').innerText = currentProductCount;
@@ -74,7 +82,7 @@ function addToCart(target) {
 };
 
 function checkCartforProduct(id) {
-    const keyArray = Object.keys(localStorage);
+    const keyArray = Object.keys(localStorage).filter((key) => key.includes('id_'));
     
     if (!id) {
         const cartClass = cart.classList;
@@ -92,10 +100,19 @@ function checkCartforProduct(id) {
     return keyArray.includes(`id_${id}`);
 };
 
+function parseFromStorage(key) {
+    const currentCardObject = JSON.parse(localStorage[`${key}`]);
+    return ` <div class="cart__product" data-id="${currentCardObject.productId}">
+                <img class="cart__product-image" src="${currentCardObject.imgSrc}">
+                <div class="cart__product-count">${currentCardObject.quantityValue}</div>
+                <a class="cart__product-remove" href="#0">&times;</a>
+            </div>`;
+};
+
 function getCartFromStorage() {
-    const keyArray = Object.keys(localStorage);
-    keyArray.forEach((item) => {
-        cartBox.innerHTML += localStorage[`${item}`];
+    const keyArray = Object.keys(localStorage).filter((key) => key.includes('id_'));
+    keyArray.forEach((key) => {
+        cartBox.innerHTML += parseFromStorage(key);
     });
 };
 
@@ -124,23 +141,27 @@ function imageToCard(target) {
 
     document.querySelector('body').appendChild(animatedImg);
 
-    let interval = setInterval(animatedImage, intervalTIme);
+    let requestId = window.requestAnimationFrame(animatedImage);
 
     function animatedImage() {
         const imgToAnimate = document.querySelector('.animated-img');
         const imgCoords = imgToAnimate.getBoundingClientRect();
 
-        if (imgCoords.x >= endX) {
-            clearInterval(interval);
-            imgToAnimate.remove();
-            return;
-        };
-
         imgToAnimate.style.left = `${startX += stepForX}px`;
         imgToAnimate.style.top = `${startY += stepForY}px`;
+
+        if (imgCoords.x >= endX) {
+            cancelAnimationFrame(requestId);
+            imgToAnimate.remove();
+            return;
+        } else {
+            window.requestAnimationFrame(animatedImage);
+        };
+
+        
     };
 
-    return animatedImage;
+    // return animatedImage;
 };
 
 getCartFromStorage();

@@ -9,29 +9,32 @@ tasksList.addEventListener('click', (event) => {
     };
 });
 
-tasksInput.addEventListener('keyup', (event) => {
-    if (event.key === 'Enter' && tasksInput.value) {
-        addTaskToList();
-    };
-});
-
 taskAddButton.addEventListener('click', () => {
-    if (tasksInput.value) {
+    let trimedTaskValue = tasksInput.value.trim();
+    tasksInput.value = trimedTaskValue;
+    if (trimedTaskValue) {
+        if (checkTaskForDubling(trimedTaskValue)) {
+            alert('Такая задача уже есть в списке');
+            tasksInput.value = '';
+            return;
+        }
         addTaskToList();
     };    
 });
     
 function addTaskToList() {
-    const newTask = 
+    const taskValue = tasksInput.value;
+    const taskId = generateTaskKeyNumber();
+
+    tasksList.innerHTML +=
         `<div class="task">
             <div class="task__title">
                 ${tasksInput.value}
             </div>
-            <a href="#" class="task__remove" data-key="task_${generateTaskKeyNumber()}">&times;</a>
+            <a href="#" class="task__remove" data-key="task_${taskId}">&times;</a>
         </div>`;
 
-    localStorage[`task_${generateTaskKeyNumber()}`] = newTask;
-    tasksList.innerHTML += newTask;
+    localStorage[`task_${taskId}`] = taskValue;
     tasksInput.value = '';  
 };
 
@@ -45,16 +48,24 @@ function generateTaskKeyNumber() {
     return i;
 };
 
+function checkTaskForDubling(value) {
+    const valueArrayInList = Object.values(localStorage);
+    return valueArrayInList.includes(value);
+}
+
 function getTaskListFromLocalStorage() {
-    const LocalStorageKeys = Object.keys(localStorage).reverse();
+    const LocalStorageKeys = Object.keys(localStorage).filter((key) => key.includes('task_'));
 
     LocalStorageKeys.forEach((key) => {
-        tasksList.innerHTML += localStorage[key];
+        tasksList.innerHTML += 
+        `<div class="task">
+            <div class="task__title">
+                ${localStorage[key]}
+            </div>
+            <a href="#" class="task__remove" data-key="${key}">&times;</a>
+        </div>`;
     });
-
 };
 
 getTaskListFromLocalStorage();
-
-
 
