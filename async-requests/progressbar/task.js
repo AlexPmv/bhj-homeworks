@@ -9,11 +9,11 @@ form.addEventListener('submit', (e) => {
 
     xhr.open('POST', form.action);
 
-    xhr.onprogress = (e) => {
-        progress.value = (e.loaded / (10 ** 8));
+    xhr.upload.onprogress = (e) => {
+        progress.value = (e.loaded / (e.total / 1)).toFixed(3);
     };
 
-    xhr.onloadend = () => {
+    xhr.upload.onloadend = () => {
         progress.value = 1;
         setTimeout(() => {
             alert('Загрузка завершена');
