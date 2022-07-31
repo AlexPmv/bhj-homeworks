@@ -8,3 +8,21 @@ textarea {
   border: 1px solid #e2e2e2;
   box-sizing: border-box;
 }
+
+.btn-clear {
+  display: block;
+  width: 100px;
+  text-align: center;
+  color: red;
+  padding: 10px 20px;
+  margin: 0 auto;
+  border: 5px solid lightblue;
+  border-radius: 10px;
+}
+
+.btn-clear:hover {
+  background-color: red;
+  color: white;
+  cursor: pointer;
+}
+
